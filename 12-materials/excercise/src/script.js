@@ -1,6 +1,22 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {Pane} from 'tweakpane';
+
+/**
+ * Textures
+ */
+const textureLoader = new THREE.TextureLoader()
+
+const doorColorTexture = textureLoader.load('/textures/door/color.jpg')
+const doorAlphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const doorAmbientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const doorHeightTexture = textureLoader.load('/textures/door/height.jpg')
+const doorNormalTexture = textureLoader.load('/textures/door/normal.jpg')
+const doorMetalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+const doorRoughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
+const gradientTexture = textureLoader.load('/textures/gradients/3.jpg')
 
 /**
  * Base
@@ -10,6 +26,94 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+
+/**
+ * Objects
+ */
+
+// const material = new THREE.MeshBasicMaterial()
+const material = new THREE.MeshStandardMaterial()
+// material.map = doorColorTexture
+// material.transparent = true
+// material.opacity = 1
+// material.flatShading = true
+material.shininess = 100
+material.specular = new THREE.Color(0x1188ff)
+
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+scene.add(ambientLight)
+ambientLight.intensity = 0.696
+
+/**
+ * Debug
+ */
+const pane = new Pane();
+pane.addInput(material, 'opacity', {
+    min:0,
+    max:1,
+    step:0.01,
+    label:"opacity"
+})
+pane.addInput(material, 'transparent', {
+    label:"transparent"
+})
+pane.addInput(material, 'flatShading', {
+    label:"flatShading"
+})
+pane.addInput(material, 'wireframe', {
+    label:"wireframe"
+})
+pane.addInput(material, 'shininess', {
+    min:0,
+    max:200,
+    step:0.1,
+    label:"shininess"
+})
+pane.addInput(ambientLight, 'intensity', {
+    min:0,
+    max:1,
+    step:0.001,
+    label:"intensity"
+})
+pane.addInput(material, 'metalness', {
+    min:0,
+    max:1,
+    step:0.001,
+    label:"metalness"
+})
+pane.addInput(material, 'roughness', {
+    min:0,
+    max:1,
+    step:0.001,
+    label:"roughness"
+})
+
+
+const sphere = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.5, 16, 16),
+    material
+)
+
+sphere.position.x = -1.5
+
+const plane = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(1, 1),
+    material
+)
+
+const torus = new THREE.Mesh(
+    new THREE.TorusGeometry(0.3, 0.2, 16, 32),
+    material
+)
+torus.position.x = 1.5
+
+scene.add(sphere, plane, torus)
+
+
 
 /**
  * Sizes
@@ -41,7 +145,7 @@ window.addEventListener('resize', () =>
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 1
 camera.position.y = 1
-camera.position.z = 2
+camera.position.z = 4
 scene.add(camera)
 
 // Controls
@@ -65,6 +169,13 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+
+    torus.rotation.y = 0.5*elapsedTime
+    torus.rotation.x = 0.5*elapsedTime
+    sphere.rotation.y = 0.5*elapsedTime
+    sphere.rotation.x = 0.5*elapsedTime
+    plane.rotation.y = 0.5*elapsedTime
+    plane.rotation.x = 0.5*elapsedTime
 
     // Update controls
     controls.update()
